@@ -24,7 +24,7 @@ public class TgBot extends TelegramLongPollingBot {
 
     final static String HELP_TEXT = "This is a demo bot, which was created with Java/Spring \n\n" +
                                      "You can execute commands from the main menu or type it manually\n\n" +
-                                     "Type \start to begin";
+                                     "Type /start to begin";
 
     public TgBot(BotConfig config) {
         this.config = config;
