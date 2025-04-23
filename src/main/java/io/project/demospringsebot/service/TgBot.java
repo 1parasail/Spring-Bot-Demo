@@ -22,6 +22,10 @@ public class TgBot extends TelegramLongPollingBot {
 
     final BotConfig config;
 
+    final static String HELP_TEXT = "This is a demo bot, which was created with Java/Spring \n\n" +
+                                     "You can execute commands from the main menu or type it manually\n\n" +
+                                     "Type \start to begin";
+
     public TgBot(BotConfig config) {
         this.config = config;
         List<BotCommand> listOfCommands = new ArrayList(); //Initialization of Menu
@@ -63,6 +67,9 @@ public class TgBot extends TelegramLongPollingBot {
                     } catch (TelegramApiException e) {
                         throw new RuntimeException(e);
                     }
+                case "/help":
+                    sendMessage(chatId, HELP_TEXT);
+                    break;
                 default:
                     sendMessage(chatId, "Invalid command");
             }
