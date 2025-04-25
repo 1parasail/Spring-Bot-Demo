@@ -14,6 +14,8 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.File;
@@ -96,6 +98,32 @@ public class TgBot extends TelegramLongPollingBot {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(String.valueOf(chatId));
         sendMessage.setText(message);
+
+        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+
+        List<KeyboardRow> keyboardRows = new ArrayList<>();
+
+        KeyboardRow keyboardRow = new KeyboardRow();
+
+        keyboardRow.add("text");
+        keyboardRow.add("text1");
+
+        keyboardRows.add(keyboardRow);
+
+        KeyboardRow keyboardRow1 = new KeyboardRow();
+
+        keyboardRow1.add("text2");
+        keyboardRow1.add("text3");
+        keyboardRow1.add("text4");
+
+        keyboardRows.add(keyboardRow1);
+
+        keyboardMarkup.setKeyboard(keyboardRows);
+
+        sendMessage.setReplyMarkup(keyboardMarkup);
+
+
+
 
         try {
             execute(sendMessage);
