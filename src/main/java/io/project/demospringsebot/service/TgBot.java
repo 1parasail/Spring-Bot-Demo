@@ -10,11 +10,14 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -44,6 +47,7 @@ public class TgBot extends TelegramLongPollingBot {
         listOfCommands.add(new BotCommand("/deletedata", "Delete data of user"));
         listOfCommands.add(new BotCommand("/help", "Guide, how to use the bot"));
         listOfCommands.add(new BotCommand("/setting", "Set your preferences"));
+        listOfCommands.add(new BotCommand("/register", "Register your user"));
         try
         {
             this.execute(new SetMyCommands(listOfCommands, new BotCommandScopeDefault(), null));
@@ -81,9 +85,50 @@ public class TgBot extends TelegramLongPollingBot {
                 case "/help":
                     sendMessage(chatId, HELP_TEXT);
                     break;
+
+                case "/register":
+                   register(chatId);
+                   break;
                 default:
                     sendMessage(chatId, "Invalid command");
             }
+        }
+        else if (update.hasCallbackQuery()==true)
+        {
+            String callbackQuery = update.getCallbackQuery().getData();
+            long messageId = update.getCallbackQuery().getMessage().getMessageId();
+            long chatId = update.getCallbackQuery().getMessage().getChatId();
+
+            if (callbackQuery.equals("Yes_Button")==true)
+            {
+                String text = "You pressed <<Yes>> Button";
+                EditMessageText editMessageText = new EditMessageText();
+                editMessageText.setChatId(String.valueOf(chatId));
+                editMessageText.setText(text);
+                editMessageText.setMessageId((int) messageId);
+
+                try {
+                    execute(editMessageText);
+                } catch (TelegramApiException e) {
+                    log.error("Error: " + e.getMessage());
+                }
+
+            }
+            else if (callbackQuery.equals("No_Button")==true)
+            {
+                String text = "You pressed <<No>> Button";
+                EditMessageText editMessageText = new EditMessageText();
+                editMessageText.setChatId(String.valueOf(chatId));
+                editMessageText.setText(text);
+                editMessageText.setMessageId((int) messageId);
+
+                try {
+                    execute(editMessageText);
+                } catch (TelegramApiException e) {
+                    log.error("Error: " + e.getMessage());
+                }
+            }
+
         }
     }
 
@@ -150,6 +195,38 @@ public class TgBot extends TelegramLongPollingBot {
             userRepository.save(user);
 
             log.info("Registered user: " + user);
+        }
+    }
+
+    private void register(long chatId)  {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(String.valueOf(chatId));
+        sendMessage.setText("Do you want to register?");
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+
+        var button = new InlineKeyboardButton();
+        button.setText("Yes");
+        button.setCallbackData("Yes_Button");//id of button
+
+        var button1 = new InlineKeyboardButton();
+        button1.setText("No");
+        button1.setCallbackData("No_Button");
+
+        row1.add(button);
+        row1.add(button1);
+
+        rowsInLine.add(row1);
+
+        inlineKeyboardMarkup.setKeyboard(rowsInLine);
+        sendMessage.setReplyMarkup(inlineKeyboardMarkup);
+
+        try {
+            execute(sendMessage);
+        } catch (TelegramApiException e) {
+            log.error("Error: " + e.getMessage());
         }
     }
 
