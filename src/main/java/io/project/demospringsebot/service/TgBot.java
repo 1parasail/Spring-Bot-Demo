@@ -1,6 +1,7 @@
 package io.project.demospringsebot.service;
 
 
+import com.vdurmont.emoji.EmojiParser;
 import io.project.demospringsebot.config.BotConfig;
 import io.project.demospringsebot.model.User;
 import io.project.demospringsebot.model.UserRepository;
@@ -73,6 +74,17 @@ public class TgBot extends TelegramLongPollingBot {
             String message = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
 
+            if(message.contains("/send")==true && config.getOwnerId()==chatId)
+            {
+                var textToSend = EmojiParser.parseToUnicode(message.substring(message.indexOf(" ")));
+                var users = userRepository.findAll();
+                for (User user : users)
+                {
+                    prepareAndSendMessage(user.getChatId(), textToSend);
+                }
+                return;
+            }
+
             switch (message) {
                 case "/start":
                     try {
@@ -133,7 +145,7 @@ public class TgBot extends TelegramLongPollingBot {
     }
 
     private void startCommand(long chatId, String name) throws TelegramApiException {
-        String answer = "Hi, " + name + "!";
+        String answer = EmojiParser.parseToUnicode("Hi, " + name + " :blush:");
         log.info("Result of starting command: " + answer);
 
         sendMessage(chatId, answer);
@@ -228,6 +240,21 @@ public class TgBot extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             log.error("Error: " + e.getMessage());
         }
+    }
+
+    private void executeMessage(SendMessage message){
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            log.error("EROR_TEXT" + e.getMessage());
+        }
+    }
+
+    private void prepareAndSendMessage(long chatId, String textToSend){
+        SendMessage message = new SendMessage();
+        message.setChatId(String.valueOf(chatId));
+        message.setText(textToSend);
+        executeMessage(message);
     }
 
 }
